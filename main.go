@@ -17,34 +17,23 @@ var (
 	db *gorm.DB
 )
 
-type Account struct {
-	gorm.Model
-
-	Name  string
-	Email string
-}
-
 func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter := mux.NewRouter()
 	myRouter.HandleFunc("/users", allUsers).Methods("GET")
-	myRouter.HandleFunc("/user/{name}", deleteUser).Methods("DELETE")
+	myRouter.HandleFunc("/user", newUser).Methods("POST")
 	myRouter.HandleFunc("/user/{name}/{email}", updateUser).Methods("PUT")
-	myRouter.HandleFunc("/user/{name}/{email}", newUser).Methods("POST")
+	myRouter.HandleFunc("/user/{name}", deleteUser).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
 func main() {
-	fmt.Println("Go ORM Tutorial")
-
-	db, err := gorm.Open("mysql", dataSourceName+dbName)
+	dbConn, err := gorm.Open("mysql", dataSourceName+dbName)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
+	db = dbConn
 
-	defer db.Close()
-
-	// Migrate the schema
-	db.AutoMigrate(&Account{})
+	fmt.Println("Database Connected Successfully")
 
 	// Handle Subsequent requests
 	handleRequests()

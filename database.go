@@ -8,28 +8,27 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Account struct {
+	ID    int64
+	Name  string
+	Email string
+}
+
 func allUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 
 	var accounts []Account
 	db.Find(&accounts)
-	fmt.Println("{}", accounts)
-
 	json.NewEncoder(w).Encode(accounts)
-
+	fmt.Println(accounts)
 }
 
 func newUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)
-	name := vars["name"]
-	email := vars["email"]
+	var account Account
+	_ = json.NewDecoder(r.Body).Decode(&account)
 
-	fmt.Println(name)
-	fmt.Println(email)
+	db.Create(&account)
 
-	db.Create(&Account{Name: name, Email: email})
 	fmt.Fprintf(w, "New User Successfully Created")
 }
 
